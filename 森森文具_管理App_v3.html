@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="森森管理">
+<title>森森文具玩具 · 管理系統</title>
+<style>
+:root{
+  --purple:#534AB7;--purple-light:#EEEDFE;--purple-dark:#3C3489;
+  --teal:#1D9E75;--teal-light:#E1F5EE;--teal-dark:#085041;
+  --amber:#BA7517;--amber-light:#FAEEDA;--amber-dark:#633806;
+  --blue:#378ADD;--blue-light:#E6F1FB;--blue-dark:#0C447C;
+  --coral:#D85A30;--coral-light:#FAECE7;--coral-dark:#712B13;
+  --green:#639922;--green-light:#EAF3DE;--green-dark:#27500A;
+  --gray:#888780;--gray-light:#F1EFE8;--gray-dark:#444441;
+  --red:#E24B4A;--red-light:#FCEBEB;--red-dark:#791F1F;
+  --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f2f1ee;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#9e9d99;
+  --border:#e8e7e3;--border2:#d3d1c7;
+  --radius:10px;--radius-sm:6px;--shadow:0 1px 3px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:var(--bg3);color:var(--text);font-size:15px;min-height:100dvh}
+/* Top bar */
+.topbar{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:17px;font-weight:600;color:var(--text)}
+.topbar-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.sync-btn{padding:6px 12px;font-size:12px;border-radius:99px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px}
+.sync-btn:active{background:var(--bg2)}
+/* Setup banner */
+.setup-banner{margin:12px 16px;background:var(--amber-light);border:1px solid #EF9F27;border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--amber-dark);display:flex;gap:10px;align-items:flex-start}
+.setup-banner input{flex:1;font-size:12px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg);color:var(--text);margin-top:6px}
+.setup-banner button{margin-top:6px;padding:6px 14px;border-radius:99px;border:none;background:var(--purple);color:#fff;font-size:12px;cursor:pointer}
+/* Tab bar */
+.tabbar{display:flex;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--border);scrollbar-width:none;-ms-overflow-style:none;position:sticky;top:57px;z-index:99}
+.tabbar::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:10px 14px;font-size:12px;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:color .15s}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple);font-weight:500}
+/* Panels */
+.panel{display:none;padding:14px 16px 100px}
+.panel.active{display:block}
+/* Cards */
+.card{background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);padding:14px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+/* Metric grid */
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.metric{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.metric-label{font-size:11px;color:var(--text3);margin-bottom:3px}
+.metric-val{font-size:22px;font-weight:600;color:var(--text)}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:2px}
+/* Forms */
+.form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.form-row label{font-size:12px;color:var(--text2)}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:14px}
+.form-row textarea{resize:none;min-height:72px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{padding:10px 18px;border-radius:99px;border:none;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--purple);color:#fff}
+.btn-primary:active{background:var(--purple-dark)}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:99px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer}
+.btn-danger{color:var(--red-dark);border-color:var(--red-light)}
+/* List items */
+.list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+.list-item:last-child{border-bottom:none}
+/* Badges */
+.badge{font-size:11px;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.badge-income{background:var(--teal-light);color:var(--teal-dark)}
+.badge-expense{background:var(--coral-light);color:var(--coral-dark)}
+.badge-todo{background:var(--purple-light);color:var(--purple-dark)}
+.badge-doing{background:var(--amber-light);color:var(--amber-dark)}
+.badge-done{background:var(--green-light);color:var(--green-dark)}
+.badge-draft{background:var(--gray-light);color:var(--gray-dark)}
+.badge-ready{background:var(--amber-light);color:var(--amber-dark)}
+.badge-posted{background:var(--green-light);color:var(--green-dark)}
+/* SOP */
+.sop-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.sop-item:last-child{border-bottom:none}
+.sop-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.sop-check.checked{background:var(--purple);border-color:var(--purple)}
+.sop-check.checked::after{content:'✓';color:#fff;font-size:13px;font-weight:700}
+.sop-text.checked{text-decoration:line-through;color:var(--text3)}
+/* Calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-nav-title{font-size:16px;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-hdr{font-size:11px;color:var(--text3);text-align:center;padding:4px 0}
+.cal-day{font-size:13px;text-align:center;padding:7px 2px;border-radius:6px;cursor:pointer;min-height:34px}
+.cal-day:active{background:var(--bg2)}
+.cal-day.today{background:var(--purple);color:#fff;font-weight:600}
+.cal-day.has-event{position:relative}
+.cal-day.has-event::after{content:'';display:block;width:4px;height:4px;border-radius:50%;background:var(--coral);margin:1px auto 0}
+.cal-day.today.has-event::after{background:#fff}
+.cal-day.other{color:var(--text3)}
+/* Shift table */
+.shift-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.shift-table{width:100%;border-collapse:collapse;font-size:12px;min-width:400px}
+.shift-table th,.shift-table td{padding:7px 4px;text-align:center;border:1px solid var(--border)}
+.shift-table th{background:var(--bg2);font-weight:500;color:var(--text2)}
+/* Chart */
+.chart-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px}
+.chart-label{width:52px;text-align:right;color:var(--text2);font-size:12px;flex-shrink:0}
+.chart-bg{flex:1;background:var(--bg3);border-radius:4px;height:18px;overflow:hidden}
+.chart-bar{height:100%;border-radius:4px;transition:width .5s}
+.chart-val{width:56px;font-weight:500;font-size:12px;flex-shrink:0}
+/* Empty */
+.empty{text-align:center;color:var(--text3);font-size:13px;padding:2rem 0}
+/* Loading */
+.loading{text-align:center;color:var(--text3);font-size:13px;padding:1.5rem 0}
+/* Kanban columns */
+.kanban{display:grid;grid-template-columns:1fr;gap:10px}
+.kanban-col{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px}
+.kanban-col-title{font-size:13px;font-weight:500;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.task-card{background:var(--bg2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;font-size:13px}
+.task-card-title{font-weight:500;margin-bottom:6px}
+.task-card-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+/* Progress bar */
+.progress-wrap{background:var(--bg3);border-radius:4px;height:8px;overflow:hidden;flex:1}
+.progress-bar{height:100%;background:var(--purple);border-radius:4px;transition:width .3s}
+/* Tag selector */
+.tag-sel{display:flex;flex-wrap:wrap;gap:6px}
+.tag-opt{font-size:12px;padding:4px 12px;border-radius:99px;border:1px solid var(--border2);cursor:pointer;color:var(--text2)}
+.tag-opt.sel{background:var(--purple);color:#fff;border-color:var(--purple)}
+/* Fab */
+.fab{display:none}
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(30,30,28,0.9);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+
+<div id="lock-screen" style="position:fixed;inset:0;background:#f2f1ee;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:0">
+  <div style="background:#fff;border-radius:16px;border:1px solid #e8e7e3;padding:2rem 2rem;width:300px;max-width:90vw">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:32px;margin-bottom:8px">🏪</div>
+      <div style="font-size:18px;font-weight:600;color:#1a1a18">森森文具玩具</div>
+      <div style="font-size:13px;color:#9e9d99;margin-top:4px">管理系統</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <input type="password" id="pw-input" placeholder="請輸入密碼" 
+        style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid #d3d1c7;font-size:15px;text-align:center;letter-spacing:4px"
+        onkeydown="if(event.key==='Enter')checkPW()">
+    </div>
+    <button onclick="checkPW()" 
+      style="width:100%;padding:12px;border-radius:99px;border:none;background:#534AB7;color:#fff;font-size:15px;font-weight:500;cursor:pointer">
+      進入
+    </button>
+    <div id="pw-error" style="text-align:center;color:#E24B4A;font-size:13px;margin-top:10px;display:none">密碼錯誤，請再試一次</div>
+    <div style="text-align:center;font-size:11px;color:#9e9d99;margin-top:16px">忘記密碼請聯絡系統管理員</div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">🏪 森森文具玩具</div>
+    <div class="topbar-sub" id="today-label"></div>
+  </div>
+  <button class="sync-btn" onclick="syncAll()">↻ 同步</button>
+</div>
+
+<div class="setup-banner" id="setup-banner">
+  <div style="flex:1">
+    <div style="font-weight:500;margin-bottom:2px">⚙️ 請先設定 API 網址</div>
+    <div style="font-size:12px">貼上你的 Google Apps Script 部署網址</div>
+    <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/...">
+    <button onclick="saveApiUrl()">儲存</button>
+  </div>
+</div>
+
+<div class="tabbar">
+  <div class="tab active" onclick="switchTab('home',this)">🏠 首頁</div>
+  <div class="tab" onclick="switchTab('finance',this)">💰 收支</div>
+  <div class="tab" onclick="switchTab('tasks',this)">📋 看板</div>
+  <div class="tab" onclick="switchTab('sop',this)">✅ SOP</div>
+  <div class="tab" onclick="switchTab('calendar',this)">📅 行事曆</div>
+  <div class="tab" onclick="switchTab('shift',this)">🕐 班表</div>
+  <div class="tab" onclick="switchTab('sales',this)">📊 銷售</div>
+  <div class="tab" onclick="switchTab('mktg',this)">📣 行銷</div>
+</div>
+
+<!-- HOME -->
+<div id="panel-home" class="panel active">
+  <div class="metrics" id="home-metrics">
+    <div class="metric"><div class="metric-label">本月收入</div><div class="metric-val" id="hm-inc">—</div></div>
+    <div class="metric"><div class="metric-label">本月支出</div><div class="metric-val" id="hm-exp">—</div></div>
+    <div class="metric"><div class="metric-label">本月淨額</div><div class="metric-val" id="hm-net">—</div></div>
+    <div class="metric"><div class="metric-label">待辦工作</div><div class="metric-val" id="hm-tasks">—</div><div class="metric-sub">項未完成</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">✅ 今日SOP進度</div>
+    <div id="home-sop-progress"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 近期活動</div>
+    <div id="home-events"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 待辦工作</div>
+    <div id="home-tasks"></div>
+  </div>
+</div>
+
+<!-- FINANCE -->
+<div id="panel-finance" class="panel">
+  <div class="card">
+    <div class="card-title">新增記錄</div>
+    <div class="form-row">
+      <div class="form-grid">
+        <select id="fin-type"><option value="income">收入</option><option value="expense">支出</option></select>
+        <select id="fin-cat">
+          <option>銷售收入</option><option>其他收入</option>
+          <option>進貨費用</option><option>租金</option><option>水電</option>
+          <option>人事薪資</option><option>行銷費用</option><option>雜支</option>
+        </select>
+      </div>
+      <div class="form-grid">
+        <input type="number" id="fin-amount" placeholder="金額">
+        <input type="date" id="fin-date">
+      </div>
+      <input type="text" id="fin-note" placeholder="備註（選填）">
+      <button class="btn btn-primary" onclick="addFinance()" style="width:100%">新增記帳</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span>記帳紀錄</span>
+      <select id="fin-filter" onchange="renderFinance()" style="font-size:12px;padding:4px 8px;border-radius:99px;border:1px solid var(--border2)">
+        <option value="all">全部</option><option value="income">收入</option><option value="expense">支出</option>
+      </select>
+    </div>
+    <div id="finance-list"><div class="loading">載入中...</div></div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div id="panel-tasks" class="panel">
+  <div class="card">
+    <div class="card-title">新增工作</div>
+    <div class="form-row">
+      <input type="text" id="task-title" placeholder="工作名稱">
+      <div class="form-grid">
+        <select id="task-priority"><option value="high">🔴 急</option><option value="mid" selected>🟡 中</option><option value="low">🟢 低</option></select>
+        <input type="date" id="task-due">
+      </div>
+      <button class="btn btn-primary" onclick="addTask()" style="width:100%">新增</button>
+    </div>
+  </div>
+  <div class="kanban" id="kanban-board"></div>
+</div>
+
+<!-- SOP -->
+<div id="panel-sop" class="panel">
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span>☀️ 開店清單</span>
+      <button class="btn-sm" onclick="resetSOP()">今日重置</button>
+    </div>
+    <div id="sop-open"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🌙 關店清單</div>
+    <div id="sop-close"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">新增項目</div>
+    <div class="form-row">
+      <select id="sop-type"><option value="open">開店</option><option value="close">關店</option></select>
+      <input type="text" id="sop-text" placeholder="檢查項目名稱">
+      <button class="btn btn-primary" onclick="addSOP()" style="width:100%">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div id="panel-calendar" class="panel">
+  <div class="card">
+    <div class="cal-nav">
+      <button class="btn-sm" onclick="calNav(-1)">＜</button>
+      <div class="cal-nav-title" id="cal-title"></div>
+      <button class="btn-sm" onclick="calNav(1)">＞</button>
+    </div>
+    <div class="cal-grid" id="cal-headers"></div>
+    <div class="cal-grid" id="cal-body"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">新增活動</div>
+    <div class="form-row">
+      <input type="date" id="ev-date">
+      <input type="text" id="ev-title" placeholder="活動名稱">
+      <select id="ev-color">
+        <option value="#534AB7">紫 — 促銷活動</option>
+        <option value="#1D9E75">綠 — 進貨</option>
+        <option value="#D85A30">橙 — 課程</option>
+        <option value="#378ADD">藍 — 其他</option>
+      </select>
+      <button class="btn btn-primary" onclick="addEvent()" style="width:100%">新增活動</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">所有活動</div>
+    <div id="event-list"><div class="loading">載入中...</div></div>
+  </div>
+</div>
+
+<!-- SHIFT -->
+<div id="panel-shift" class="panel">
+  <div class="card">
+    <div class="card-title">新增排班</div>
+    <div class="form-row">
+      <input type="date" id="sh-date">
+      <div class="form-grid">
+        <select id="sh-staff"><option>老闆</option><option>小美</option><option>小明</option></select>
+        <select id="sh-shift">
+          <option value="早班 10-15">早班 10–15</option>
+          <option value="晚班 15-21">晚班 15–21</option>
+          <option value="全天 10-21">全天 10–21</option>
+          <option value="休假">休假</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="addShift()" style="width:100%">新增排班</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">本週班表</div>
+    <div class="shift-wrap"><table class="shift-table" id="shift-table"></table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">薪資試算</div>
+    <div class="form-row">
+      <div class="form-grid">
+        <input type="number" id="hourly-rate" value="190" placeholder="時薪">
+        <button class="btn btn-primary" onclick="calcSalary()">試算本月</button>
+      </div>
+    </div>
+    <div id="salary-result"></div>
+  </div>
+</div>
+
+<!-- SALES -->
+<div id="panel-sales" class="panel">
+  <div class="metrics" id="sales-metrics">
+    <div class="metric"><div class="metric-label">本月營收</div><div class="metric-val" id="sm-rev">—</div></div>
+    <div class="metric"><div class="metric-label">本月毛利</div><div class="metric-val" id="sm-profit">—</div></div>
+    <div class="metric"><div class="metric-label">毛利率</div><div class="metric-val" id="sm-margin">—</div></div>
+    <div class="metric"><div class="metric-label">筆數</div><div class="metric-val" id="sm-count">—</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">新增銷售</div>
+    <div class="form-row">
+      <div class="form-grid">
+        <input type="text" id="sl-product" placeholder="商品名稱">
+        <select id="sl-cat"><option>文具</option><option>玩具</option><option>益智</option><option>藝術</option><option>其他</option></select>
+      </div>
+      <div class="form-grid">
+        <input type="number" id="sl-revenue" placeholder="營收">
+        <input type="number" id="sl-cost" placeholder="成本">
+      </div>
+      <input type="date" id="sl-date">
+      <button class="btn btn-primary" onclick="addSale()" style="width:100%">新增</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">各類別銷售</div>
+    <div id="sales-chart"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">銷售紀錄</div>
+    <div id="sales-list"><div class="loading">載入中...</div></div>
+  </div>
+</div>
+
+<!-- MKTG -->
+<div id="panel-mktg" class="panel">
+  <div class="card">
+    <div class="card-title">新增行銷內容</div>
+    <div class="form-row">
+      <div class="form-grid">
+        <select id="mk-platform"><option>Instagram</option><option>Facebook</option><option>Line</option></select>
+        <input type="date" id="mk-date">
+      </div>
+      <input type="text" id="mk-title" placeholder="貼文主題">
+      <textarea id="mk-content" placeholder="貼文內容草稿..."></textarea>
+      <div class="tag-sel" id="mk-tags">
+        <span class="tag-opt" onclick="this.classList.toggle('sel')">新品上架</span>
+        <span class="tag-opt" onclick="this.classList.toggle('sel')">促銷活動</span>
+        <span class="tag-opt" onclick="this.classList.toggle('sel')">節慶</span>
+        <span class="tag-opt" onclick="this.classList.toggle('sel')">課程</span>
+        <span class="tag-opt" onclick="this.classList.toggle('sel')">日常</span>
+      </div>
+      <select id="mk-status"><option value="draft">草稿</option><option value="ready">待發布</option><option value="posted">已發布</option></select>
+      <button class="btn btn-primary" onclick="addMktg()" style="width:100%">儲存</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">行銷清單</div>
+    <div id="mktg-list"><div class="loading">載入中...</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let API_URL = localStorage.getItem('ss_api_url') || '';
+let cache = { finance:[], tasks:[], sop:[], events:[], shifts:[], sales:[], mktg:[] };
+let calYear, calMonth;
+const DAYS = ['日','一','二','三','四','五','六'];
+const STAFF = ['老闆','小美','小明'];
+
+// Init
+document.getElementById('today-label').textContent = new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+['fin-date','ev-date','sh-date','sl-date','mk-date','task-due'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.value=today();
+});
+const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth();
+if(API_URL) { document.getElementById('setup-banner').style.display='none'; syncAll(); }
+document.getElementById('api-url-input').addEventListener('keydown', function(e){ if(e.key==='Enter') saveApiUrl(); });
+
+function today(){ return new Date().toISOString().split('T')[0]; }
+function thisMonth(){ return today().slice(0,7); }
+function fmtDate(d){ return d?new Date(d+'T00:00:00').toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'}):'—'; }
+
+function saveApiUrl(){
+  var input = document.getElementById('api-url-input');
+  var url = input.value.trim();
+  if(!url){ alert('請貼上網址後再按儲存'); return; }
+  API_URL = url;
+  try{ localStorage.setItem('ss_api_url', url); }catch(e){}
+  document.getElementById('setup-banner').style.display='none';
+  showToast('API 網址已儲存，同步中...');
+  syncAll();
+}
+
+async function api(action, sheet, data={}) {
+  if(!API_URL){ showToast('請先設定 API 網址'); return null; }
+  try {
+    const url = new URL(API_URL);
+    url.searchParams.set('action', action);
+    url.searchParams.set('sheet', sheet);
+    if(action==='getAll'){
+      const res = await fetch(url.toString());
+      return await res.json();
+    } else {
+      const res = await fetch(API_URL, {
+        method:'POST', body: JSON.stringify({action, sheet, ...data}),
+        headers:{'Content-Type':'application/json'}
+      });
+      return await res.json();
+    }
+  } catch(e) {
+    showToast('網路錯誤：' + e.message);
+    return null;
+  }
+}
+
+async function syncAll(){
+  showToast('同步中...');
+  const keys = ['finance','tasks','sop','events','shifts','sales','mktg'];
+  await Promise.all(keys.map(async k => {
+    const data = await api('getAll', k);
+    if(data) cache[k] = Array.isArray(data) ? data : [];
+  }));
+  renderCurrent();
+  showToast('同步完成 ✓');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+let currentTab='home';
+function switchTab(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+  currentTab=id;
+  renderCurrent();
+}
+function renderCurrent(){
+  const r={home:renderHome,finance:renderFinance,tasks:renderTasks,sop:renderSOP,
+    calendar:renderCal,shift:renderShift,sales:renderSales,mktg:renderMktg};
+  if(r[currentTab]) r[currentTab]();
+}
+
+// HOME
+function renderHome(){
+  const m=thisMonth();
+  const inc=cache.finance.filter(f=>f.type==='income'&&String(f.date).startsWith(m)).reduce((s,f)=>s+Number(f.amount),0);
+  const exp=cache.finance.filter(f=>f.type==='expense'&&String(f.date).startsWith(m)).reduce((s,f)=>s+Number(f.amount),0);
+  document.getElementById('hm-inc').textContent='$'+inc.toLocaleString();
+  document.getElementById('hm-exp').textContent='$'+exp.toLocaleString();
+  const net=inc-exp;
+  const netEl=document.getElementById('hm-net');
+  netEl.textContent='$'+net.toLocaleString();
+  netEl.style.color=net>=0?'#27500A':'#791F1F';
+  const pending=cache.tasks.filter(t=>t.status!=='done').length;
+  document.getElementById('hm-tasks').textContent=pending;
+  const open=cache.sop.filter(s=>s.type==='open');
+  const done=open.filter(s=>String(s.done)==='true'||s.done===true).length;
+  document.getElementById('home-sop-progress').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+      <span style="color:var(--text2)">開店 ${done}/${open.length}</span>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${open.length?Math.round(done/open.length*100):0}%"></div></div>
+      <span style="color:var(--text3);font-size:12px">${open.length?Math.round(done/open.length*100):0}%</span>
+    </div>`;
+  const upEvents=cache.events.filter(e=>String(e.date)>=today()).sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(0,4);
+  document.getElementById('home-events').innerHTML=upEvents.length?upEvents.map(e=>`
+    <div class="list-item"><div style="width:8px;height:8px;border-radius:50%;background:${e.color};flex-shrink:0"></div>
+    <div style="flex:1"><div>${e.title}</div><div style="font-size:11px;color:var(--text3)">${fmtDate(String(e.date))}</div></div></div>`).join(''):`<div class="empty">暫無活動</div>`;
+  const todoTasks=cache.tasks.filter(t=>t.status==='todo').slice(0,5);
+  document.getElementById('home-tasks').innerHTML=todoTasks.length?todoTasks.map(t=>`
+    <div class="list-item"><span class="badge ${t.priority==='high'?'badge-expense':t.priority==='mid'?'badge-doing':'badge-done'}">${t.priority==='high'?'急':t.priority==='mid'?'中':'低'}</span>
+    <span style="flex:1">${t.title}</span>${t.due?`<span style="font-size:11px;color:var(--text3)">${fmtDate(String(t.due))}</span>`:''}</div>`).join(''):`<div class="empty">沒有待辦！</div>`;
+}
+
+// FINANCE
+async function addFinance(){
+  const type=document.getElementById('fin-type').value;
+  const cat=document.getElementById('fin-cat').value;
+  const amount=parseFloat(document.getElementById('fin-amount').value);
+  const date=document.getElementById('fin-date').value;
+  const note=document.getElementById('fin-note').value;
+  if(!amount||!date){showToast('請填金額與日期');return;}
+  const res=await api('add','finance',{data:{type,cat,amount,date,note}});
+  if(res?.success){
+    cache.finance.push({id:res.id,type,cat,amount,date,note});
+    document.getElementById('fin-amount').value='';
+    document.getElementById('fin-note').value='';
+    showToast('已新增');renderFinance();
+  }
+}
+function renderFinance(){
+  const filter=document.getElementById('fin-filter').value;
+  const list=cache.finance.filter(f=>filter==='all'||f.type===filter).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  document.getElementById('finance-list').innerHTML=list.length?list.map(f=>`
+    <div class="list-item">
+      <span class="badge ${f.type==='income'?'badge-income':'badge-expense'}">${f.type==='income'?'收入':'支出'}</span>
+      <span style="font-size:11px;color:var(--text3)">${fmtDate(String(f.date))}</span>
+      <span style="flex:1;font-size:13px">${f.cat}${f.note?' · '+f.note:''}</span>
+      <span style="font-weight:600">${f.type==='income'?'+':'-'}$${Number(f.amount).toLocaleString()}</span>
+      <button class="btn-sm btn-danger" onclick="delFinance('${f.id}')">✕</button>
+    </div>`).join(''):`<div class="empty">尚無記錄</div>`;
+}
+async function delFinance(id){
+  await api('delete','finance',{id});
+  cache.finance=cache.finance.filter(f=>f.id!==id);
+  renderFinance();showToast('已刪除');
+}
+
+// TASKS
+async function addTask(){
+  const title=document.getElementById('task-title').value.trim();
+  if(!title){showToast('請填工作名稱');return;}
+  const data={title,status:'todo',priority:document.getElementById('task-priority').value,due:document.getElementById('task-due').value};
+  const res=await api('add','tasks',{data});
+  if(res?.success){cache.tasks.push({id:res.id,...data});document.getElementById('task-title').value='';showToast('已新增');renderTasks();}
+}
+async function moveTask(id,status){
+  await api('update','tasks',{id,data:{status}});
+  const t=cache.tasks.find(t=>t.id===id);if(t)t.status=status;
+  renderTasks();
+}
+async function delTask(id){
+  await api('delete','tasks',{id});
+  cache.tasks=cache.tasks.filter(t=>t.id!==id);renderTasks();showToast('已刪除');
+}
+function renderTasks(){
+  const cols=[{s:'todo',label:'待辦',badge:'badge-todo',icon:'○'},{s:'doing',label:'進行中',badge:'badge-doing',icon:'◑'},{s:'done',label:'完成',badge:'badge-done',icon:'●'}];
+  document.getElementById('kanban-board').innerHTML=cols.map(col=>{
+    const items=cache.tasks.filter(t=>t.status===col.s);
+    return `<div class="kanban-col">
+      <div class="kanban-col-title"><span class="badge ${col.badge}">${col.icon} ${col.label} ${items.length}</span></div>
+      ${items.length?items.map(t=>`<div class="task-card">
+        <div class="task-card-title">${t.title}</div>
+        <div class="task-card-meta">
+          <span class="badge ${t.priority==='high'?'badge-expense':t.priority==='mid'?'badge-doing':'badge-done'}">${t.priority==='high'?'急':t.priority==='mid'?'中':'低'}</span>
+          ${t.due?`<span style="font-size:11px;color:var(--text3)">${fmtDate(String(t.due))}</span>`:''}
+          <div style="display:flex;gap:4px;margin-left:auto">
+            ${col.s!=='doing'?`<button class="btn-sm" onclick="moveTask('${t.id}','doing')" style="font-size:11px;padding:3px 8px">進行</button>`:''}
+            ${col.s!=='done'?`<button class="btn-sm" onclick="moveTask('${t.id}','done')" style="font-size:11px;padding:3px 8px">完成</button>`:''}
+            <button class="btn-sm btn-danger" onclick="delTask('${t.id}')" style="font-size:11px;padding:3px 8px">✕</button>
+          </div>
+        </div>
+      </div>`).join(''):`<div class="empty" style="padding:1rem 0">空</div>`}
+    </div>`;
+  }).join('');
+}
+
+// SOP
+async function addSOP(){
+  const type=document.getElementById('sop-type').value;
+  const text=document.getElementById('sop-text').value.trim();
+  if(!text){showToast('請填項目名稱');return;}
+  const data={type,text,done:false,order:Date.now()};
+  const res=await api('add','sop',{data});
+  if(res?.success){cache.sop.push({id:res.id,...data});document.getElementById('sop-text').value='';showToast('已新增');renderSOP();}
+}
+async function toggleSOP(id){
+  const item=cache.sop.find(s=>s.id===id);if(!item)return;
+  const done=!(String(item.done)==='true'||item.done===true);
+  await api('update','sop',{id,data:{done}});
+  item.done=done;renderSOP();renderHome();
+}
+async function delSOP(id){
+  await api('delete','sop',{id});
+  cache.sop=cache.sop.filter(s=>s.id!==id);renderSOP();showToast('已刪除');
+}
+async function resetSOP(){
+  const opens=cache.sop.filter(s=>s.type==='open'||s.type==='close');
+  await Promise.all(opens.map(s=>api('update','sop',{id:s.id,data:{done:false}})));
+  cache.sop.forEach(s=>s.done=false);renderSOP();showToast('SOP已重置');
+}
+function renderSOP(){
+  ['open','close'].forEach(type=>{
+    const items=cache.sop.filter(s=>s.type===type);
+    document.getElementById('sop-'+type).innerHTML=items.length?items.map(item=>{
+      const isDone=String(item.done)==='true'||item.done===true;
+      return `<div class="sop-item" onclick="toggleSOP('${item.id}')">
+        <div class="sop-check ${isDone?'checked'}"></div>
+        <span class="sop-text ${isDone?'checked'}" style="flex:1">${item.text}</span>
+        <button class="btn-sm btn-danger" onclick="event.stopPropagation();delSOP('${item.id}')" style="font-size:11px;padding:3px 8px">✕</button>
+      </div>`;
+    }).join(''):`<div class="empty">尚無項目，點下方新增</div>`;
+  });
+}
+
+// CALENDAR
+function renderCal(){
+  document.getElementById('cal-title').textContent=`${calYear} 年 ${calMonth+1} 月`;
+  document.getElementById('cal-headers').innerHTML=DAYS.map(d=>`<div class="cal-hdr">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const prevDays=new Date(calYear,calMonth,0).getDate();
+  let html='';
+  for(let i=0;i<first;i++){html+=`<div class="cal-day other">${prevDays-first+1+i}</div>`;}
+  for(let d=1;d<=days;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasEv=cache.events.some(e=>String(e.date)===ds);
+    const isToday=ds===today();
+    html+=`<div class="cal-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="pickCalDay('${ds}')">${d}</div>`;
+  }
+  const rem=(7-(first+days)%7)%7;
+  for(let i=1;i<=rem;i++)html+=`<div class="cal-day other">${i}</div>`;
+  document.getElementById('cal-body').innerHTML=html;
+  renderEventList();
+}
+function calNav(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+function pickCalDay(date){document.getElementById('ev-date').value=date;}
+async function addEvent(){
+  const date=document.getElementById('ev-date').value;
+  const title=document.getElementById('ev-title').value.trim();
+  const color=document.getElementById('ev-color').value;
+  if(!date||!title){showToast('請填日期與活動名稱');return;}
+  const res=await api('add','events',{data:{date,title,color}});
+  if(res?.success){cache.events.push({id:res.id,date,title,color});document.getElementById('ev-title').value='';showToast('已新增');renderCal();}
+}
+function renderEventList(){
+  const sorted=cache.events.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  document.getElementById('event-list').innerHTML=sorted.length?sorted.map(e=>`
+    <div class="list-item">
+      <div style="width:10px;height:10px;border-radius:50%;background:${e.color};flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-size:14px">${e.title}</div><div style="font-size:11px;color:var(--text3)">${fmtDate(String(e.date))}</div></div>
+      <button class="btn-sm btn-danger" onclick="delEvent('${e.id}')">✕</button>
+    </div>`).join(''):`<div class="empty">尚無活動</div>`;
+}
+async function delEvent(id){
+  await api('delete','events',{id});
+  cache.events=cache.events.filter(e=>e.id!==id);renderCal();showToast('已刪除');
+}
+
+// SHIFT
+async function addShift(){
+  const date=document.getElementById('sh-date').value;
+  const staff=document.getElementById('sh-staff').value;
+  const shift=document.getElementById('sh-shift').value;
+  if(!date){showToast('請選日期');return;}
+  const existing=cache.shifts.find(s=>String(s.date)===date&&s.staff===staff);
+  if(existing){
+    await api('update','shifts',{id:existing.id,data:{shift}});
+    existing.shift=shift;
+  } else {
+    const res=await api('add','shifts',{data:{date,staff,shift}});
+    if(res?.success)cache.shifts.push({id:res.id,date,staff,shift});
+  }
+  showToast('班表已更新');renderShift();
+}
+function renderShift(){
+  const now=new Date();
+  const mon=new Date(now);mon.setDate(now.getDate()-now.getDay()+1);
+  const week=Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d.toISOString().split('T')[0];});
+  const shiftColors={'早班 10-15':'badge-todo','晚班 15-21':'badge-doing','全天 10-21':'badge-expense','休假':'badge-draft'};
+  let html=`<thead><tr><th>員工</th>${week.map(d=>`<th>${d.slice(5)}<br><small style="font-weight:400;color:var(--text3)">${DAYS[new Date(d+'T00:00:00').getDay()]}</small></th>`).join('')}</tr></thead><tbody>`;
+  STAFF.forEach(staff=>{
+    html+=`<tr><td style="font-weight:500;white-space:nowrap">${staff}</td>`;
+    week.forEach(date=>{
+      const s=cache.shifts.find(s=>String(s.date)===date&&s.staff===staff);
+      if(s)html+=`<td><span class="badge ${shiftColors[s.shift]||'badge-draft'}" style="font-size:10px">${s.shift}</span></td>`;
+      else html+=`<td style="color:var(--text3)">—</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('shift-table').innerHTML=html;
+}
+function calcSalary(){
+  const rate=parseFloat(document.getElementById('hourly-rate').value)||190;
+  const m=thisMonth();
+  const hours={'早班 10-15':5,'晚班 15-21':6,'全天 10-21':11,'休假':0};
+  const result=STAFF.map(staff=>{
+    const total=cache.shifts.filter(s=>String(s.date).startsWith(m)&&s.staff===staff).reduce((sum,s)=>sum+(hours[s.shift]||0),0);
+    return `<div class="list-item"><span style="font-weight:500;flex:1">${staff}</span><span style="color:var(--text2)">${total} 小時</span><span style="font-weight:600;margin-left:12px">$${(total*rate).toLocaleString()}</span></div>`;
+  }).join('');
+  document.getElementById('salary-result').innerHTML=result||`<div class="empty">尚無本月排班</div>`;
+}
+
+// SALES
+async function addSale(){
+  const product=document.getElementById('sl-product').value.trim();
+  const cat=document.getElementById('sl-cat').value;
+  const revenue=parseFloat(document.getElementById('sl-revenue').value);
+  const cost=parseFloat(document.getElementById('sl-cost').value)||0;
+  const date=document.getElementById('sl-date').value;
+  if(!product||!revenue||!date){showToast('請填必要欄位');return;}
+  const res=await api('add','sales',{data:{product,cat,revenue,cost,date}});
+  if(res?.success){
+    cache.sales.push({id:res.id,product,cat,revenue,cost,date});
+    document.getElementById('sl-product').value='';
+    document.getElementById('sl-revenue').value='';
+    document.getElementById('sl-cost').value='';
+    showToast('已新增');renderSales();
+  }
+}
+function renderSales(){
+  const m=thisMonth();
+  const ms=cache.sales.filter(s=>String(s.date).startsWith(m));
+  const rev=ms.reduce((s,i)=>s+Number(i.revenue),0);
+  const cost=ms.reduce((s,i)=>s+Number(i.cost),0);
+  const profit=rev-cost;
+  const margin=rev>0?Math.round(profit/rev*100):0;
+  document.getElementById('sm-rev').textContent='$'+rev.toLocaleString();
+  document.getElementById('sm-profit').textContent='$'+profit.toLocaleString();
+  document.getElementById('sm-margin').textContent=margin+'%';
+  document.getElementById('sm-count').textContent=ms.length;
+  const cats=['文具','玩具','益智','藝術','其他'];
+  const colors={'文具':'#534AB7','玩具':'#D85A30','益智':'#1D9E75','藝術':'#378ADD','其他':'#888780'};
+  const totals={};cats.forEach(c=>totals[c]=0);
+  cache.sales.forEach(s=>{if(totals[s.cat]!==undefined)totals[s.cat]+=Number(s.revenue);});
+  const maxV=Math.max(...Object.values(totals),1);
+  document.getElementById('sales-chart').innerHTML=cats.map(c=>`
+    <div class="chart-row">
+      <div class="chart-label">${c}</div>
+      <div class="chart-bg"><div class="chart-bar" style="width:${Math.round(totals[c]/maxV*100)}%;background:${colors[c]}"></div></div>
+      <div class="chart-val">$${totals[c].toLocaleString()}</div>
+    </div>`).join('');
+  const sorted=cache.sales.sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,30);
+  document.getElementById('sales-list').innerHTML=sorted.length?sorted.map(s=>`
+    <div class="list-item">
+      <span style="font-size:11px;color:var(--text3)">${fmtDate(String(s.date))}</span>
+      <span class="badge badge-todo" style="font-size:10px">${s.cat}</span>
+      <span style="flex:1;font-size:13px">${s.product}</span>
+      <span style="font-weight:600">$${Number(s.revenue).toLocaleString()}</span>
+      <button class="btn-sm btn-danger" onclick="delSale('${s.id}')">✕</button>
+    </div>`).join(''):`<div class="empty">尚無銷售記錄</div>`;
+}
+async function delSale(id){
+  await api('delete','sales',{id});
+  cache.sales=cache.sales.filter(s=>s.id!==id);renderSales();showToast('已刪除');
+}
+
+// MKTG
+async function addMktg(){
+  const platform=document.getElementById('mk-platform').value;
+  const date=document.getElementById('mk-date').value;
+  const title=document.getElementById('mk-title').value.trim();
+  const content=document.getElementById('mk-content').value.trim();
+  const status=document.getElementById('mk-status').value;
+  const tags=[...document.querySelectorAll('#mk-tags .tag-opt.sel')].map(el=>el.textContent).join(',');
+  if(!title||!date){showToast('請填主題與日期');return;}
+  const res=await api('add','mktg',{data:{platform,date,title,content,status,tags}});
+  if(res?.success){
+    cache.mktg.push({id:res.id,platform,date,title,content,status,tags});
+    document.getElementById('mk-title').value='';
+    document.getElementById('mk-content').value='';
+    document.querySelectorAll('#mk-tags .tag-opt').forEach(el=>el.classList.remove('sel'));
+    showToast('已儲存');renderMktg();
+  }
+}
+function renderMktg(){
+  const statusLabel={draft:'草稿',ready:'待發布',posted:'已發布'};
+  const statusClass={draft:'badge-draft',ready:'badge-ready',posted:'badge-posted'};
+  const sorted=cache.mktg.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  document.getElementById('mktg-list').innerHTML=sorted.length?sorted.map(m=>`
+    <div style="border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        <span style="font-weight:500;font-size:14px">${m.title}</span>
+        <span class="badge ${statusClass[m.status]||'badge-draft'}">${statusLabel[m.status]||m.status}</span>
+        <span style="font-size:11px;color:var(--text3)">${m.platform} · ${fmtDate(String(m.date))}</span>
+        <button class="btn-sm btn-danger" onclick="delMktg('${m.id}')" style="margin-left:auto;font-size:11px;padding:3px 8px">✕</button>
+      </div>
+      ${m.tags?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${m.tags.split(',').filter(t=>t).map(t=>`<span class="badge badge-todo" style="font-size:10px">${t}</span>`).join('')}</div>`:''}
+      <div style="font-size:13px;color:var(--text2);white-space:pre-wrap">${m.content||'（無草稿內容）'}</div>
+    </div>`).join(''):`<div class="empty">尚無行銷內容</div>`;
+}
+async function delMktg(id){
+  await api('delete','mktg',{id});
+  cache.mktg=cache.mktg.filter(m=>m.id!==id);renderMktg();showToast('已刪除');
+}
+
+// Initial render
+renderHome();
+</script>
+
+<script>
+(function(){
+  var CORRECT = '1234'; // ← 在這裡修改密碼
+  var SESSION_KEY = 'ss_auth';
+  var lock = document.getElementById('lock-screen');
+  if(sessionStorage.getItem(SESSION_KEY) === 'ok'){
+    lock.style.display = 'none'; return;
+  }
+  lock.style.display = 'flex';
+  window.checkPW = function(){
+    var val = document.getElementById('pw-input').value;
+    if(val === CORRECT){
+      sessionStorage.setItem(SESSION_KEY, 'ok');
+      lock.style.display = 'none';
+    } else {
+      document.getElementById('pw-error').style.display = 'block';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+    }
+  };
+  setTimeout(function(){ document.getElementById('pw-input').focus(); }, 100);
+})();
+</script>
+
+</body>
+</html>
